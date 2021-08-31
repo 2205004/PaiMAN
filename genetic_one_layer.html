@@ -1,0 +1,847 @@
+
+
+<!DOCTYPE html>
+<html>
+  <head><script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+    <title>Pac-man</title>
+    <meta charset="utf-8">
+  <!-- Main Style -->
+  <link href="pacman.css" rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+    <div class="container">
+      <canvas id="canvas" width="630" height="630">Canvas not supported</canvas>
+      <div id="desc">
+        <span>
+          Gen: 
+          <span id="gen">0</span>
+        </span>
+        <span>
+          Move: 
+          <span id="move">0</span>
+        </span>
+          Points:
+          <span id="currentPointsAmount">0</span>
+          /
+          <span id="pointsAmount">0</span>
+        </span>
+        <span>
+          Score: 
+          <span id="currentScore">0</span>
+        </span>
+        <span>
+          ghosteat: 
+          <span id="ghosteat">0</span>
+        </span>
+        <HR>
+        <span>
+          <br>input:
+          <span id="input"></span>
+        </span>
+        <span>
+          <br>top Result (output):
+          <span id="output"></span>
+        </span>
+        <span>
+          <br>mutation persent:
+          <span id="persent"></span> %
+        </span>
+        <HR>
+    turns[0]="Right";<br>
+	turns[1]="Down"; <br>
+	turns[2]="Left";<br>
+	turns[3]="Up"; <br>
+        <span>
+          <br>exportData:
+          <pre><span id="exportData"></span></pre>
+        </span>
+		
+		
+      </div>
+      <div id="start" class="pop-up">
+        <div class="center">
+          <div class="name">PAIMAN</div>
+          <h3 class="press">Press space to play or pause</h3>
+          <p class="controls">Controls</p>
+          <div class="control-button-box">
+            <div class="control-button up">&uarr;</div>
+            <div class="control-button left">&larr;</div>
+            <div class="control-button down">&darr;</div>
+            <div class="control-button right">&rarr;</div>
+          </div>
+          <div class='spacebar'>
+        <span>
+          <br>delay by movement in ms:<br>
+          <input type="text" onchange="moveDelay=this.value;console.log('set delay to '+moveDelay);" id="delay"><br>
+          <input type="button" id="startbutton" value="start">
+          </span>
+        </span></div>
+        </div>
+      </div>
+      <div id="pause" class="pop-up">
+        <div class="center">
+          Pause
+        </div>
+      </div>
+      <div id="win" class="pop-up">
+        <div class="center">
+          <h2 class="result">You win!</h2>
+          <p>Score: <span class="allScores"></span></p>
+          <h3 class="press">Press here or spacebar to play again</h3>
+        </div>
+      </div>
+      <div id="lose" class="pop-up">
+        <div class="center">
+          <h2 class="result">You lost!</h2>
+          <p>Score: <span class="allScores"></span></p>
+          <h3 class="press">Press here or spacebar to play again</h3>
+        </div>
+      </div>
+    </div>
+
+    <script>
+	    
+
+
+/* Основные переменные */
+	var hiddenLayers=[8, 4];
+	var w = {};
+	var defoultW = {};
+	var BestW={};
+	var BestW={0: "0.1", 1: "-0.51", 2: "0.1", 3: "0.1", 4: "0.1", 5: "0.52", 6: "0.1", 7: "0.1", 8: "0.1", 9: "0.1", 10: "0.1", 11: "-0.53", 12: "0.1", 13: "0.1", 14: "0.1", 15: "0.54", 16: "-0.55", 17: "0.1", 18: "0.1", 19: "0.1", 20: "0.56", 21: "0.1", 22: "0.1", 23: "0.1", 24: "0.1", 25: "0.1", 26: "-0.57", 27: "0.1", 28: "0.1", 29: "0.1", 30: "0.58", 31: "0.1"};
+	var BestW={0: " -0.07477025389671325 ", 1: "0.4777", 2: " -0.3577913522720337 ", 3: "-0.7745", 4: " -0.3972308158874512 ", 5: "-0.7240", 6: " -0.037580367922782895 ", 7: "0.6324", 8: " 0.13686708211898804 ", 9: " -0.024083100259304047 ", 10: " 0.14543057680130006 ", 11: " -0.2478945016860962 ", 12: " 0.11856158971786498 ", 13: " -0.3429755449295044 ", 14: " 0.19132412672042848 ", 15: " 0.03308744430541992 ", 16: "-0.8306", 17: " -0.03950683176517487 ", 18: "0.9749", 19: "0.5436", 20: " 0.4644627571105957 ", 21: "-0.1130", 22: " -0.2485740900039673 ", 23: " -0.23981795310974122 ", 24: " -0.1423875570297241 ", 25: " -0.2708145618438721 ", 26: " -0.13989919424057007 ", 27: " 0.5706021308898925 ", 28: "0.0449", 29: " 0.4228829383850098 ", 30: " -0.06043800115585327 ", 31: " -0.27099268436431884 ", mutation: "5%", score: 169}
+	var tempBestW=0;
+
+	var sensorsCount=0;
+	var outputCount=4;
+	var stack=0;
+	var restartCount=0;
+	var avgPointsByGen=0;
+    var avgPointsByGenPrew=0;
+    var subavaragePointsByGen=0;
+	var units = [];
+	var gen=0;
+	var grafics=1;
+	
+	var unitsInGeneration=10; //популяция
+	var persent=5; // процент мутации
+	
+	var maxScore=0;
+var desigionCounter=0;
+var moved=0;
+var output;
+var sensors = {};
+var actions = {};
+var turns = {}
+	turns[0]="Right";
+	turns[1]="Down"; 
+	turns[2]="Left";
+	turns[3]="Up"; 
+var elem = {
+  canvas: document.getElementById("canvas"),
+  start: document.getElementById('start'),
+  startbutton: document.getElementById('startbutton'),
+  pause: document.getElementById('pause'),
+  win: document.getElementById('win'),
+  lose: document.getElementById('lose'),
+  desc: document.getElementById('desc'),
+  gen: document.getElementById('gen'),
+  move: document.getElementById('move'),
+  currentPointsAmount: document.getElementById('currentPointsAmount'),
+  pointsAmount: document.getElementById('pointsAmount'),
+  currentScore: document.getElementById('currentScore'),
+  input: document.getElementById('input'),
+  output: document.getElementById('output'),
+  ghosteat: document.getElementById('ghosteat'),
+  currentLifes: document.getElementById('currentLives'),
+  persent: document.getElementById('persent'),
+  exportData: document.getElementById('exportData')
+}, 
+  state = "start",
+  ctx = elem.canvas.getContext("2d"),
+  cellAmount = 21, 
+  cellSize = elem.canvas.width / cellAmount,
+  levels = [{
+    obstaclesMap: [
+      [1, 6], [1, 16],[1, 1], [1, 2], [1, 3], [1, 4], [1, 5], [1, 7], [1, 8], [1, 9], [1, 10], [1, 11], [1, 12], [1, 13], [1, 14], [1, 15], [1, 17], [1, 18], [1, 19], [1, 20], [1, 21],
+      [2, 1], [2, 21],
+      [3, 1], [3, 6], [3, 8], [3, 11], [3, 14], [3, 16], [3, 21],
+      [4, 1], [4, 3], [4, 4], [4, 8], [4, 10], [4, 11], [4, 12], [4, 14], [4, 18], [4, 19], [4, 21],
+      [5, 1], [5, 6], [5, 8], [5, 10], [5, 11], [5, 12], [5, 14], [5, 16], [5, 21],
+      [6, 1],  [6, 4], [6, 6], [6, 11], [6, 16], [6, 18], [6, 21], [7, 21],
+      [7, 1], [7, 6], [7, 8], [7, 9], [7, 11], [7, 13], [7, 14], [7, 16],
+      [8, 1], [8, 3], [8, 4], [8, 8], [8, 14], [8, 18], [8, 19], [8, 21],
+      [9, 1], [9, 6], [9, 10], [9, 11], [9, 8], [9, 12], [9, 14], [9, 16], [9, 21],
+      [10, 1], [10, 4], [10, 6], [10, 10], [10, 12], [10, 16], [10, 18], [10, 21],
+      [11, 1], [11, 6], [11, 8], [11, 12], [11, 14], [11, 16], [11, 21],
+      [12, 1], [12, 4], [12, 6], [12, 10], [12, 12], [12, 16], [12, 18], [12, 21],
+      [13, 1], [13, 6], [13, 8], [13, 10], [13, 11], [13, 12], [13, 14], [13, 16],  [13, 21],
+      [14, 1], [14, 3], [14, 4], [14, 8], [14, 14], [14, 18], [14, 19], [14, 21],
+      [15, 1], [15, 6], [15, 8], [15, 9], [15, 11], [15, 13], [15, 14], [15, 16], [15, 21],
+      [16, 1], [16, 4], [16, 6], [16, 11], [16, 16], [16, 18], [16, 21],
+      [17, 1], [17, 6], [17, 8], [17, 10], [17, 11], [17, 12], [17, 14], [17, 16], [17, 21],
+      [18, 1], [18, 3], [18, 4], [18, 8], [18, 10], [18, 11], [18, 12], [18, 14], [18, 18], [18, 19], [18, 21],
+      [19, 1], [19, 6], [19, 8], [19, 11], [19, 14], [19, 16], [19, 21],
+      [20, 1], [20, 21],
+      [21, 6], [21, 16],
+      [21, 1], [21,2], [21,3], [21, 4], [21, 5], [21, 7], [21, 8], [21, 9], [21, 10], [21, 11], [21, 12], [21, 13], [21, 14], [21, 15], [21, 17], [21, 18], [21, 19], [21, 20], [21, 21]
+    ], 
+    specialObstaclesMap: [[11, 10]],
+    pointsMap: [
+       [2, 4], [2, 5], [2, 7], [2, 10], [2, 12], [2, 15], [2, 17],  [2, 2], [2, 3], [2, 6], [2, 8], [2, 9], [2, 13], [2, 14], [2, 16], [2, 18], [2, 19], [2, 20], 
+		[3, 2], [3, 3], [3, 4], [3, 5], [3, 7], [3, 9], [3, 10], [3, 12], [3, 13], [3, 15], [3, 17], [3, 18], [3, 19], [3, 20],
+       [4, 2], [4, 5], [4, 6], [4, 7], [4, 9], [4, 13], [4, 15], [4, 16], [4, 17], [4, 20], 
+       [5, 2], [5, 3], [5, 4], [5, 5], [5, 7], [5, 9], [5, 13], [5, 15], [5, 17], [5, 18], [5, 19], [5, 20],
+       [6, 2], [6, 3], [6, 5], [6, 7], [6, 8], [6, 9], [6, 10], [6, 12], [6, 13], [6, 14], [6, 15], [6, 17], [6, 19], [6, 20], 
+       [7, 2], [7, 3], [7, 4], [7, 5], [7, 7], [7, 15], [7, 17], [7, 18], [7, 19], [7, 20],
+       [8, 2], [8, 5], [8, 6], [8, 7], [8, 15], [8, 16], [8, 17], [8, 20], 
+       [9, 2], [9, 3], [9, 4], [9, 5], [9, 7], [9, 15], [9, 17], [9, 18], [9, 19], [9, 20],
+       [10, 2], [10, 3], [10, 5], [10, 7], [10, 15], [10, 17], [10, 19], [10, 20],
+       [11, 2], [11, 3], [11, 4], [11, 5], [11, 7], [11, 17], [11, 18], [11, 19], [11, 20],
+       [12, 2], [12, 3], [12, 5], [12, 7], [12, 15], [12, 17], [12, 19], [12, 20],
+       [13, 2], [13, 3], [13, 4], [13, 5], [13, 7], [13, 15], [13, 17], [13, 18], [13, 19], [13, 20],
+       [14, 2], [14, 5], [14, 6], [14, 7], [14, 15], [14, 16], [14, 17], [14, 20],
+       [15, 2], [15, 3], [15, 4], [15, 5], [15, 7], [15, 15], [15, 17], [15, 18], [15, 19], [15, 20],
+       [16, 2], [16, 3], [16, 5], [16, 7], [16, 8], [16, 9], [16, 10], [16, 12], [16, 13], [16, 14], [16, 15], [16, 17], [16, 19], [16, 20], 
+       [17, 2], [17, 3], [17, 4], [17, 5], [17, 7], [17, 9], [17, 13], [17, 15], [17, 17], [17, 18], [17, 19], [17, 20], 
+       [18, 2], [18, 5], [18, 6], [18, 7], [18, 9], [18, 13], [18, 15], [18, 16], [18, 17], [18, 20],
+       [19, 2], [19, 3], [19, 4], [19, 5], [19, 7], [19, 9], [19, 10], [19, 12], [19, 13], [19, 15], [19, 17], [19, 18], [19, 19], [19, 20],
+       [20, 2], [20, 3], [20, 6], [20, 8], [20, 9], [20, 11], [20, 13], [20, 14], [20, 16], [20, 18], [20, 20], [20, 4], [20, 5], [20, 7], [20, 10], [20, 12], [20, 15], [20, 17], [20, 19], 
+    ],
+    energyMap: [[11, 11]]
+  }, 
+  ],
+  defaults = {
+    level: 0,
+    score: 0,
+    lives: 3,
+    pacman: {x:11, y:2, dir: 1, angle: 5, phase: 1, stack: [], timeLastMove: 0,  animateMoveId: 0,},
+    ghosts: [
+     // {type: 'Blinky', x: 10, y: 11, dir: 0, stack: []},
+     // {type: 'Pinky', x: 11, y: 11, dir: 0, stack: []},
+     // {type: 'Inky', x: 12, y: 11, dir: 0, stack: []}
+    ]
+  },
+  map = {},
+  level = 0,
+  points = 0,
+  score = 0,
+  ghosteat = 0,
+  lives = 0,
+  pacman = {},
+  animateGhostsId = 0,
+  moveCount = 0,	// задержка
+  moveDelay = 0,	// задержка
+  ghostsMoveDelay = moveDelay*1,
+  ghosts = [],
+  energy = 0;
+  
+/* Конец основных переменных */
+
+/* Блок обрабтки действий пользователя */
+elem.startbutton.onclick = function(){
+  reset();
+  start();
+}
+
+elem.pause.onclick = function(){
+  continuation();
+}
+
+elem.win.onclick = function(){
+  reset();
+  start();
+}
+
+elem.lose.onclick = function(){
+  reset();
+  start();
+}
+document.onkeydown = function(e) {//реакция на нажиние клавиш
+  if(e.keyCode == 32){//если пробел
+    switch(state){
+      case 'end':
+      case 'start': 
+        reset();
+        start();
+        break;
+      case 'play': 
+        pause();
+        break;
+      case 'pause': 
+        continuation();
+        break;
+    }
+    return;
+  }
+
+  if(e.keyCode < 37 || e.keyCode > 40 || state != 'play'){//если не клавиши движения
+    return;
+  }
+
+  var dir;
+  switch(e.keyCode){// 0 - вправо, 1 - вниз, 2 - влево, 3 - вверх
+    case 38: dir = 3;
+      break;
+    case 39: dir = 0;
+      break;
+    case 40: dir = 1;
+      break;
+    case 37: dir = 2;
+      break;
+  }
+
+  if(Date.now() - pacman.timeLastMove > moveDelay){//
+      pacman.stack.push(dir);
+      console.log("> move "+turns[dir]);
+      return;
+  }
+
+  cleanObject(pacman);
+  movePacman(dir);
+
+  e.preventDefault();
+}
+/* Конец блока обработки действий пользователя */
+
+
+
+
+
+
+
+
+/* Блок фукнций по изменению состояния игры */
+function start(){
+  state = "play";
+  elem.start.style.display = 'none';
+  elem.desc.style.display = 'block';
+  elem.currentPointsAmount.textContent = 0
+  elem.pointsAmount.textContent = levels[level].pointsMap.length;//указание общего количества точек на уровне
+  
+  
+  checkMap();
+  createMap();
+  drawMap();
+  drawPacman();//Начальная отрисовка пакмана
+  
+	setSensors();
+	setweights();
+
+  animateMove();
+}
+
+
+function restart(){
+	
+	if (score > maxScore){
+		//console.log("score="+score+" > maxScore = "+maxScore);
+		tempBestW=roundObject(w);
+		maxScore=score;
+		tempBestW.score=score;
+		console.log('Новый рекорд '+score+'points');
+		elem.output.textContent=score;
+		elem.persent.textContent=persent;
+	}
+	restartCount++;
+	console.log("restartCount "+restartCount);
+	if(restartCount>=unitsInGeneration)
+		{	avgPointsByGen=avgPointsByGen/unitsInGeneration;
+			restartCount=0;
+			units=[];
+			gen++; 
+			//elem.exportData.textContent=elem.exportData.textContent+' \n'+gen+' Рекорд '+maxScore+'points. avgPointsByGen:'+avgPointsByGen+':';
+			
+			if(avgPointsByGenPrew<avgPointsByGen){
+				BestW=tempBestW;
+				//elem.exportData.textContent=elem.exportData.textContent+'if'+avgPointsByGenPrew+'>'+avgPointsByGen+'){BestW = tempBestW ';
+				avgPointsByGenPrew=avgPointsByGen;
+			}
+			
+			var subavarage=100;
+			subavaragePointsByGen= subavaragePointsByGen+avgPointsByGen;
+			if(gen % subavarage == 0){
+				subavaragePointsByGen=subavaragePointsByGen/subavarage;
+				elem.exportData.textContent=elem.exportData.textContent+'\n === среднее за '+subavarage+' поколений ;'+subavaragePointsByGen+'; ';
+				subavaragePointsByGen=0;
+			}
+			avgPointsByGen=0;
+			//console.log(BestW);
+			//console.log('NEXT GEN');
+			
+		}
+		else
+		{
+			//elem.exportData.textContent=elem.exportData.textContent+' --'+score;
+			avgPointsByGen=avgPointsByGen+score;
+			reset();
+			start();
+		}
+			elem.gen.textContent=gen+' '+restartCount;
+}
+
+function pause(){
+  state = 'pause';
+  elem.pause.style.display = 'block'; 
+
+  stopAnimateMove();
+}
+
+function continuation(){
+  state = 'play';
+  elem.pause.style.display = 'none';
+
+  animateMove();
+}
+
+function win() {
+  state = 'end';
+  elem.win.style.display = 'block';
+  document.getElementsByClassName('allScores')[0].textContent = score;
+
+  stopAnimateMove();
+}
+
+function lose() {
+  state = 'end';
+  elem.lose.style.display = 'block';
+  document.getElementsByClassName('allScores')[1].textContent = score;
+
+  stopAnimateMove();
+}
+/* Конец блока фукнций по изменению состояния игры */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Блок функций для работы с картой */
+
+function reset(){// Восстановление начальных показателей
+	stopAnimateMove();
+	  desigionCounter=0;
+	  stack=moveCount;
+  ctx.clearRect(0, 0, elem.canvas.width, elem.canvas.height);
+  elem.win.style.display = 'none';
+  elem.lose.style.display = 'none';
+  level = defaults.level, points = 0, moveCount = 0, score = defaults.score, lives = defaults.lives, pacman.stack = []; 
+  for(var key in defaults.pacman){
+    pacman[key] = defaults.pacman[key];
+  }
+}
+
+function checkMap(){
+  var map = levels[level].obstaclesMap.concat(levels[level].pointsMap);
+  for(var i = 0; i < map.length; i++){
+    if(!isFinite(map[i][0]) || !isFinite(map[i][1]) || map[i][0] <= 0 || map[i][1] <= 0 || map[i][0] % 1 != 0 || map[i][1] % 1 != 0){
+      throw new Error('Map Error: incorrect coordinates ' + map[i][0] + ', ' + map[i][1]);
+    }
+    for(var j = 0; j < map.length; j++){
+      if(map[i][0] == map[j][0] && map[i][1] == map[j][1] && map[i] != map[j]){
+        throw new Error('Map Error: intersection objects');
+      }
+    }
+  }
+}
+
+function createMap(){
+  for(var key in levels[level]){
+    if(typeof(levels[level][key]) == 'object'){
+      map[key] = [];
+      map[key] = levels[level][key].slice();
+    }
+    else{
+      map[key] = levels[level][key];
+    }
+  }
+}
+
+function drawMap(){
+  if(grafics == 1){
+	  ctx.fillStyle = '#000232'; // стены 
+	  for(var i = 0; i < levels[level].obstaclesMap.length; i++){
+		ctx.fillRect((levels[level].obstaclesMap[i][0] - 1) * cellSize, (levels[level].obstaclesMap[i][1] - 1) * cellSize, cellSize, cellSize);
+	  }
+
+	  ctx.fillStyle = '#a7a6a7';// дверь 
+	  for(var i = 0; i < levels[level].specialObstaclesMap.length; i++){
+		ctx.fillRect((levels[level].specialObstaclesMap[i][0] - 1) * cellSize, (levels[level].specialObstaclesMap[i][1] - 1) * cellSize, cellSize, cellSize);
+	  }
+
+	  ctx.fillStyle = '#ffffff';// energy
+	  for(var i = 0; i < levels[level].pointsMap.length; i++){
+		ctx.beginPath();
+		ctx.arc((levels[level].pointsMap[i][0] - 0.5) * cellSize, (levels[level].pointsMap[i][1] - 0.5) * cellSize, 0.1 *cellSize, 0, Math.PI * 2, true);
+		ctx.fill();
+	  }
+
+	  for(var i = 0; i < levels[level].energyMap.length; i++){
+		ctx.beginPath();
+		ctx.arc((levels[level].energyMap[i][0] - 0.5) * cellSize, (levels[level].energyMap[i][1] - 0.5) * cellSize, 0.25 *cellSize, 0, Math.PI * 2, true);
+		ctx.fill();
+	  }
+  }
+}
+
+
+
+function cleanObject(object) {//Стирание объекта
+	ctx.clearRect((object.x - 1) * cellSize, (object.y - 1) * cellSize, cellSize, cellSize);
+}
+
+/* Конец блока функций для работы с картой */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Блок фукнций для работы пакмана */
+
+function drawPacman() {//Отрисовка пакмана
+  if(grafics==1){
+	  var center = {x: (pacman.x - 0.5) * cellSize, y: (pacman.y - 0.5) * cellSize}
+	  ctx.fillStyle = "yellow";
+	  ctx.beginPath();
+	  if(pacman.angle == 0){
+		ctx.arc(center.x, center.y, cellSize / 2.25, Math.PI * pacman.dir / 2, Math.PI * pacman.dir / 2 + Math.PI * 2, false);
+	  } else {
+		ctx.arc(center.x, center.y, cellSize / 2.25, Math.PI * pacman.dir / 2 - Math.PI * 0.05 * pacman.angle, Math.PI * pacman.dir / 2 + Math.PI * 0.05 * pacman.angle, true);
+	  }  
+	  ctx.lineTo(center.x, center.y);
+	  ctx.closePath();
+	  ctx.fill();
+  }
+}
+
+function movePacman(dir) {
+	//if(typeof(dir)=="undefined"){
+		dir=makeDesigion();
+	//}
+	console.log('function movePacman '+dir);
+  var x = pacman.x, y = pacman.y;
+  
+  switch(dir){
+    case 3: y--;
+      break;
+    case 0: x++;
+      break;
+    case 1: y++;
+      break;
+    case 2: x--;
+      break;
+  }
+  
+  
+	
+  if(x < 1 || y < 1 || x > cellAmount || y > cellAmount){
+    if(dir != pacman.dir){
+      //movePacman(pacman.dir);
+    }else{console.log('error moving to cellAmount');}
+    return;
+  }
+  for(var i = 0; i < levels[level].obstaclesMap.length; i++){
+    if(x == levels[level].obstaclesMap[i][0] && y == levels[level].obstaclesMap[i][1]){
+      if(dir != pacman.dir){
+        //movePacman(pacman.dir);
+		}else{console.log('error moving  to obstaclesMap dir'+dir+' != pacman.dir'+pacman.dir);}
+      return;
+	}//else{console.log('error moving  to obstaclesMap');}
+  }
+  for(var i = 0; i < levels[level].specialObstaclesMap.length; i++){
+    if(x == levels[level].specialObstaclesMap[i][0] && y == levels[level].specialObstaclesMap[i][1]){
+      if(dir != pacman.dir){
+        //movePacman(pacman.dir);
+      }
+      return;
+    }
+  }
+  
+  cleanObject(pacman);
+  pacman.x = x, pacman.y = y, pacman.dir = dir;
+  drawPacman();
+  eatPoint();
+
+    
+  //console.log("pacman х="+x+" y="+y);
+  
+  
+  	console.log(">>>> next move");
+  
+  elem.move.textContent=moveCount++;
+ 
+}
+
+
+function eatPoint(){
+  for(var i = 0; i < map.pointsMap.length; i++){
+    if(pacman.x == map.pointsMap[i][0] && pacman.y == map.pointsMap[i][1]){
+      score ++;
+      elem.currentScore.textContent = score;
+      map.pointsMap.splice(i, 1);
+      
+      elem.currentPointsAmount.textContent = (levels[level].pointsMap.length - map.pointsMap.length);
+      if(map.pointsMap.length == 0){
+        win();
+      }
+      break;
+    }
+  }
+}
+
+function animateMove(){
+  pacman.animateMoveId = setInterval(function() {
+    if(pacman.stack.length > 0){
+      movePacman(pacman.stack.shift());
+    } else {
+      movePacman();
+    }
+   checkIfstack();
+  console.log('animateMove'+moveDelay)
+  }, moveDelay);
+}
+
+function stopAnimateMove(){
+  clearInterval(pacman.animateMoveId);
+}
+/* Конец блока фукнций для работы пакмана */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////
+///////установка сенсоров
+//////////////////////////////////////////
+function setSensors(){ // установка сенсоров
+	
+	//sensors.energy = energy;
+	//sensors.energy = 0;
+	
+	sensorsCount=0;
+
+    obstacles (pacman.x - 1, pacman.y, "oLeft");
+    obstacles (pacman.x + 1, pacman.y, "oRight");
+    obstacles (pacman.x, pacman.y - 1, "oUp");
+    obstacles (pacman.x, pacman.y + 1, "oDown");
+
+    points (pacman.x - 1, pacman.y, "pLeft");
+    points (pacman.x + 1, pacman.y, "pRight");
+    points (pacman.x, pacman.y - 1, "pUp");
+    points (pacman.x, pacman.y + 1, "pDown");
+
+    function obstacles(x, y, dir){//проверка препятствия на сенсоре
+	sensors[dir] = 0;
+      for(var j = 0; j < map.obstaclesMap.length; j++){ // препятствие
+        if(map.obstaclesMap[j][0] == x && map.obstaclesMap[j][1] == y){ // Eсли есть препятствие
+			sensors[dir] = 1;
+			if(grafics == 1){
+				ctx.fillStyle = "red";
+				ctx.beginPath();
+				ctx.arc((x-0.5) * cellSize, (y-0.5) * cellSize, cellSize / 7, Math.PI * 2, false); 
+				ctx.fill();
+			}
+        }
+      }
+    }
+    
+    function points(x, y, dir){//проверка точки  на сенсоре
+	sensors[dir] = 0;
+      for(var j = 0; j < map.pointsMap.length; j++){ // точка
+        if(map.pointsMap[j][0] == x && map.pointsMap[j][1] == y){ // Eсли есть точка
+			sensors[dir] = 1;
+			if(grafics == 1){
+				ctx.fillStyle = "red";
+				ctx.beginPath();
+				ctx.arc((x-0.5) * cellSize, (y-0.5) * cellSize, cellSize / 20, Math.PI * 2, false); 
+				ctx.fill();	
+			}
+        }
+      }
+    }
+    
+    
+    input="";
+	for (key in sensors){
+		input +=  key +" = "+ sensors[key] +"; ";
+		sensorsCount++;
+	}
+	  if(grafics == 1){elem.input.textContent = input ; }
+}
+//////////////////////////////////////////
+/////// установка весов для первого поколения случайные для остыльных - на осн лучших весов предидущего поколения
+//////////////////////////////////////////
+
+
+function setweights(){
+		if(Object.keys(BestW).length != 0){ // если не первое поколение
+			//w=BestW;
+			w=mutation(BestW);
+			//console.log(' new w is mutated BestW ');
+		}
+		else{
+			var wCount=sensorsCount*outputCount; // количество связей
+			//console.log('wCount= '+wCount);
+			for (var i = 0; i < wCount; i++) { 
+			var j = (-1 + Math.random() * 2).toFixed(2);// слусайное число от -1 до 1
+			w[i] = j; 
+			}  
+		}
+	//console.log("setweights");
+	console.log(w);
+	//console.log(BestW);
+}
+
+
+//////////////////////////////////////////
+///////округлить веса
+//////////////////////////////////////////
+function roundObject(obj){
+	//console.log("округлить ");
+	//console.log(obj);
+	//var newobj={};
+	//for (key in obj) {
+	//  newobj[key]=obj[key].toFixed(2);
+	//}
+	newobj=obj;
+	return newobj;
+}
+
+//////////////////////////////////////////
+///////перезапуск если застрял пакмен
+//////////////////////////////////////////
+
+
+function checkIfstack(){
+	
+	if(desigionCounter>1){ // если уперся 
+		stack++;
+		if(stack-moveCount>10){
+			restart()
+		}
+	}
+	if(moveCount>400){
+		restart()
+	}
+	
+	 //console.log ("desigionCounter="+desigionCounter+"; stack= "+stack );
+	 
+}
+//////////////////////////////////////////
+/////// мутация 
+//////////////////////////////////////////
+
+function mutation (BestW){
+	
+	
+	mutatedBestW =  jQuery.extend(true, {}, BestW);// скопировать
+	
+	mutatedBestW.mutation=persent+'%';
+	
+	var wCount=sensorsCount*outputCount; // количество связей
+	var mutatedCount = Math.ceil(wCount * persent / 100); // количество шт мутировавших весов 
+	for(i=0; i<mutatedCount; i++){
+		(Math.random() * wCount).toFixed()
+		var mutated=(Math.random() * wCount).toFixed()
+		mutatedBestW[mutated]=(-1 + Math.random() * 2).toFixed(4);// слусайное число от -1 до 1
+		//console.log("mutated weight id in  mutatedBestWBestW= "+ mutated);
+	}
+	
+	return mutatedBestW;
+}
+
+//////////////////////////////////////////
+/////// принятие решения
+//////////////////////////////////////////
+
+
+function makeDesigion(){
+	setSensors();
+	var inpFromSensors;
+	
+	//layer0=layer(dim=80, input_dim=8)
+	output=layer(dim=4, input=sensors);
+	
+	var maxSum=0;
+	for (d in output){ // перебор сумм входом для выходного слоя
+		if(output[d]>maxSum){
+			maxSum=output[d];
+			console.log (" maxSum="+output[d]+"dir=d("+d);
+			dir=Number(d);	
+		}
+	}
+	
+	pacman.stack.push(dir);
+	console.log ("> i think "+turns[dir]+dir);
+	//console.log (pacman.x+" "+pacman.y);
+	
+	
+	desigionCounter++;
+	return dir;
+}
+
+
+ 
+
+
+
+function layer(dim, input_dim, input=sensors){
+	i=0;
+	var SuminpFromSensors=0;
+	var output=new Array(dim).fill(0);
+		
+	for (x in input){ // преребор вхолов сенсоров (input_dim раз)
+			
+		for (var a=0; a<dim; a++){ // перебор нейронов  
+			
+			output[a]=Number(w[i])*input[x]+output[a];
+			console.log (" a="+a+" x="+x+" input[x]="+input[x]+" w"+i+":"+w[i]+" SuminpFromSensors="+SuminpFromSensors+" output[a]="+output[a]);
+			i++;  
+			
+		}
+		//console.log (" следующий входной слой");
+	}
+
+	return output;
+}
+
+</script>
+
+
+</body>
+</html><!-- zzz </body><!-->

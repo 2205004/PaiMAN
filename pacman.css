@@ -1,0 +1,99 @@
+body{
+  margin: 0;
+  font-family: Tahoma, Calibri, Arial, sans-serif;
+  background: #efefff;
+  font-size: 15px;
+}
+.container{
+	position: relative;
+	margin: 30px auto 0;
+}
+#desc{
+	display: none;
+}
+#level{
+  margin-right: 30px;
+}
+#pointsAmount{
+	margin-right: 20px;
+}
+#currentScore{
+	margin-right: 20px;
+}
+#canvas{
+  border: 1px solid black;
+  background: #666266;
+}
+.pop-up{
+	display: none;
+	position: absolute;
+	top: 1px;
+	left: 1px;
+	width: 630px;
+	height: 630px;
+	background: rgba(255, 255, 255, .4);
+	z-index: 1;
+	cursor: pointer;
+}
+#start.pop-up{
+	display: block;
+	position: absolute;
+}
+.center{
+	text-align: center;
+}
+.name{
+	margin-top: 40px;
+	font: 600 72px Tahoma, Calibri, Arial, sans-serif;
+    color: #fff;
+}
+#pacman-letter{
+	display: inline-block;
+	width: 55px;
+	height: 55px;
+}
+.press{
+	margin: 50px 0 30px;
+	font-size: 36px;
+	text-shadow: #dd7e7e 1px 0 0px, #ffeeee 0 1px 0px, #ffeeee -1px 0 0px, #ffeeee 0 -1px 0px;
+}
+.control-button-box{
+	position: absolute;
+	left: 265px;
+	width: 100px;
+	height: 65px;
+	font-size: 20px;
+}
+.control-button{
+	position: absolute;
+	width: 30px;
+	height: 30px;
+	border: 1px solid #000000;
+}
+.control-button.up{
+	top: 0px;
+	left: 34px;
+}
+.control-button.left{
+	bottom: 0px;
+	left: 0px;
+}
+.control-button.down{
+	bottom: 0px;
+	left: 34px;
+}
+.control-button.right{
+	bottom: 0px;
+	right: 0px;
+}
+.spacebar{
+	margin-top: 120px;
+}
+.result{
+	margin-top: 68px;
+	font-size: 48px;
+	text-shadow: #dd7e7e 1px 0 0px, #ffeeee 0 1px 0px, #ffeeee -1px 0 0px, #ffeeee 0 -1px 0px;
+}
+.cbalink{
+	display: none;
+}
