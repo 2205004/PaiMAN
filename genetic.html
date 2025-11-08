@@ -2,7 +2,9 @@
 
 <!DOCTYPE html>
 <html>
-  <head><script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
+  <head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.js" integrity="sha256-2Kok7MbOyxpgUVvAk/HJ2jigOSYS2auK4Pfzbm7uH60=" crossorigin="anonymous"></script>
     <title>Pac-man</title>
     <meta charset="utf-8">
   <!-- Main Style -->
@@ -13,11 +15,11 @@
       <canvas id="canvas" width="630" height="630">Canvas not supported</canvas>
       <div id="desc">
         <span>
-          Gen: 
+          Gen:
           <span id="gen">0</span>
         </span>
         <span>
-          Move: 
+          Move:
           <span id="move">0</span>
         </span>
           Points:
@@ -26,11 +28,11 @@
           <span id="pointsAmount">0</span>
         </span>
         <span>
-          Score: 
+          Score:
           <span id="currentScore">0</span>
         </span>
         <span>
-          ghosteat: 
+          ghosteat:
           <span id="ghosteat">0</span>
         </span>
         <HR>
@@ -39,20 +41,28 @@
           <span id="input"></span>
         </span>
         <span>
-          <br>top Result (output):
-          <span id="output"></span>
+          <br>output:
+         <pre> <span id="output"></span></pre>
         </span>
         <span>
-          <br>mutation persent:
-          <span id="persent"></span> %
+          <br>score:
+          <span id="score"></span>
+        </span>
+        <span>
+          <br>mutation percent:
+          <span id="percent"></span> %
         </span>
         <HR>
         <span>
           <br>output:
           <pre><span id="exportData"></span></pre>
         </span>
-		
-		
+
+        <span>
+          <br>configData:
+          <span id="configData"></span>
+        </span>
+
       </div>
       <div id="start" class="pop-up">
         <div class="center">
@@ -96,49 +106,68 @@
     </div>
 
     <script>
-	    
+
 
 
 /* Основные переменные */
-	var hiddenLayers=[8, 4];
-	var w = {};
-	var defoultW = {};
-	var BestW={};
-	var BestW={
-0 :" -0.05632504224777222 ", 
-1 :" 0.11430742740631103 ", 
-2 :" -0.18297940492630005 ", 
-3 :" 0.12412233352661133 ", 
-4 :" -0.19304391145706176 ", 
-5 :" 0.09465715289115906 ", 
-6 :" -0.04444715976715088 ", 
-7 :" 0.15671591758728026 ", 
-8 :" 0.1160764217376709 ", 
-9 :" -0.0588988184928894 ", 
-10 :" 0.10013031959533691 ", 
-11 :" -0.17164788246154786 ", 
-12 :" 0.10321868658065796 ", 
-13 :" -0.21795120239257812 ", 
-14 :" 0.1554471254348755 ", 
-15 :" -0.04376943707466126 ", 
-16 :" -0.19735586643218994 ", 
-17 :" -0.08645974993705749 ", 
-18 :" 0.34413278102874756 ", 
-19 :" -0.062011486291885375 ", 
-20 :" 0.3494168996810913 ", 
-21 :" -0.03963682651519775 ", 
-22 :" -0.15615332126617432 ", 
-23 :" -0.15409812927246094 ", 
-24 :" -0.06799679398536682 ", 
-25 :" -0.14828047752380372 ", 
-26 :" -0.1453607439994812 ", 
-27 :" 0.370312237739563 ", 
-28 :" -0.10756486654281616 ", 
-29 :" 0.28570587635040284 ", 
-30 :" -0.06258336305618287 ", 
-31 :" -0.11867554187774658 ", 
- };
-	var tempBestW=0;
+const wMin = -100
+const wMax = 100
+var grafics=1;
+var unitsInGeneration=5; //популяция
+var percent=10; // процент мутации
+
+var BestW=[];
+
+const layersConfig = [8, 4];
+const layersConfigMethod = ['linear']; //linear step ReLU
+var BestW=[[68,-20,-66,80,-49,75,81,63.1045,22,-1,80,-13.0585,78,5,54.5325,55,126,-66,72,5.736,61,-53,32,83,-27,-46,44,-53,45,84,3,-9]];
+
+// const layersConfig = [8, 8, 8, 4];
+// const layersConfigMethod = ['step', 'ReLU', 'linear']; //linear step ReLU
+// var BestW=[[-48,44,-23,102.9105,81,-60,-42,-47,-32,26,-17,78,91.432,-74,-5.775,85,14,86,-48,52,82,52,34,-85,45,42,-56,-57.1875,-17,-53.2665,-2.01,-93,95,84,98.58,-95,1,78,71,-23,-77,-53,46.776,-33,-1,21,-99,13,29,-5,-41.382,6,22,25,62,44,22,85,95,21,-7,87,37,6],[-63,-3,-57,12,-99,-10,16,-75,-99,83,-38,15,54,86,39,66,-63,-30,-87.075,-91,50,-81,66,60,17.613,48,23,81,94,-56.405,59,-19,77,-76,-13,12,89,-15,64,-61,-41,75,-32,10,28,-2,-59.791846514875004,-26,-23,-12,-92,-38,-69.084,1,4,-81,61.659,-18,38,14,59.479,97,78,-8.016],[70,-38,-31,-17,-23,-65.8275,47,-36,-71,-52,-6,-60,-3,46,-30,-33.948,18,-42,-99,-79,13.468,44,42,-42,-6.699,80,95,58,-77,-37,-17,8]]
+
+var w = {};
+var defoultW = {};
+
+// 	var BestW={
+// 0 :" -0.05632504224777222 ",
+// 1 :" 0.11430742740631103 ",
+// 2 :" -0.18297940492630005 ",
+// 3 :" 0.12412233352661133 ",
+// 4 :" -0.19304391145706176 ",
+// 5 :" 0.09465715289115906 ",
+// 6 :" -0.04444715976715088 ",
+// 7 :" 0.15671591758728026 ",
+// 8 :" 0.1160764217376709 ",
+// 9 :" -0.0588988184928894 ",
+// 10 :" 0.10013031959533691 ",
+// 11 :" -0.17164788246154786 ",
+// 12 :" 0.10321868658065796 ",
+// 13 :" -0.21795120239257812 ",
+// 14 :" 0.1554471254348755 ",
+// 15 :" -0.04376943707466126 ",
+// 16 :" -0.19735586643218994 ",
+// 17 :" -0.08645974993705749 ",
+// 18 :" 0.34413278102874756 ",
+// 19 :" -0.062011486291885375 ",
+// 20 :" 0.3494168996810913 ",
+// 21 :" -0.03963682651519775 ",
+// 22 :" -0.15615332126617432 ",
+// 23 :" -0.15409812927246094 ",
+// 24 :" -0.06799679398536682 ",
+// 25 :" -0.14828047752380372 ",
+// 26 :" -0.1453607439994812 ",
+// 27 :" 0.370312237739563 ",
+// 28 :" -0.10756486654281616 ",
+// 29 :" 0.28570587635040284 ",
+// 30 :" -0.06258336305618287 ",
+// 31 :" -0.11867554187774658 ",
+//  };
+	var tempBestW=[];
+	var lastBestW=[];
+	var prewBestW=[];
+	var badMutatedWeights=[];
+	var prewgenWasBad=0;
 
 	var sensorsCount=0;
 	var outputCount=4;
@@ -149,11 +178,7 @@
     var subavaragePointsByGen=0;
 	var units = [];
 	var gen=0;
-	var grafics=1;
-	
-	var unitsInGeneration=10; //популяция
-	var persent=5; // процент мутации
-	
+
 	var maxScore=0;
 var desigionCounter=0;
 var moved=0;
@@ -162,9 +187,9 @@ var sensors = {};
 var actions = {};
 var turns = {}
 	turns[0]="Right";
-	turns[1]="Down"; 
+	turns[1]="Down";
 	turns[2]="Left";
-	turns[3]="Up"; 
+	turns[3]="Up";
 var elem = {
   canvas: document.getElementById("canvas"),
   start: document.getElementById('start'),
@@ -178,16 +203,18 @@ var elem = {
   currentPointsAmount: document.getElementById('currentPointsAmount'),
   pointsAmount: document.getElementById('pointsAmount'),
   currentScore: document.getElementById('currentScore'),
-  input: document.getElementById('input'),
+  inputShow: document.getElementById('input'),
   output: document.getElementById('output'),
+  score: document.getElementById('score'),
   ghosteat: document.getElementById('ghosteat'),
   currentLifes: document.getElementById('currentLives'),
-  persent: document.getElementById('persent'),
-  exportData: document.getElementById('exportData')
-}, 
+  percent: document.getElementById('percent'),
+  exportData: document.getElementById('exportData'),
+  configData: document.getElementById('configData')
+},
   state = "start",
   ctx = elem.canvas.getContext("2d"),
-  cellAmount = 21, 
+  cellAmount = 21,
   cellSize = elem.canvas.width / cellAmount,
   levels = [{
     obstaclesMap: [
@@ -213,16 +240,16 @@ var elem = {
       [20, 1], [20, 21],
       [21, 6], [21, 16],
       [21, 1], [21,2], [21,3], [21, 4], [21, 5], [21, 7], [21, 8], [21, 9], [21, 10], [21, 11], [21, 12], [21, 13], [21, 14], [21, 15], [21, 17], [21, 18], [21, 19], [21, 20], [21, 21]
-    ], 
+    ],
     specialObstaclesMap: [[11, 10]],
     pointsMap: [
-       [2, 4], [2, 5], [2, 7], [2, 10], [2, 12], [2, 15], [2, 17],  [2, 2], [2, 3], [2, 6], [2, 8], [2, 9], [2, 13], [2, 14], [2, 16], [2, 18], [2, 19], [2, 20], 
+       [2, 4], [2, 5], [2, 7], [2, 10], [2, 12], [2, 15], [2, 17],  [2, 2], [2, 3], [2, 6], [2, 8], [2, 9], [2, 13], [2, 14], [2, 16], [2, 18], [2, 19], [2, 20],
 		[3, 2], [3, 3], [3, 4], [3, 5], [3, 7], [3, 9], [3, 10], [3, 12], [3, 13], [3, 15], [3, 17], [3, 18], [3, 19], [3, 20],
-       [4, 2], [4, 5], [4, 6], [4, 7], [4, 9], [4, 13], [4, 15], [4, 16], [4, 17], [4, 20], 
+       [4, 2], [4, 5], [4, 6], [4, 7], [4, 9], [4, 13], [4, 15], [4, 16], [4, 17], [4, 20],
        [5, 2], [5, 3], [5, 4], [5, 5], [5, 7], [5, 9], [5, 13], [5, 15], [5, 17], [5, 18], [5, 19], [5, 20],
-       [6, 2], [6, 3], [6, 5], [6, 7], [6, 8], [6, 9], [6, 10], [6, 12], [6, 13], [6, 14], [6, 15], [6, 17], [6, 19], [6, 20], 
+       [6, 2], [6, 3], [6, 5], [6, 7], [6, 8], [6, 9], [6, 10], [6, 12], [6, 13], [6, 14], [6, 15], [6, 17], [6, 19], [6, 20],
        [7, 2], [7, 3], [7, 4], [7, 5], [7, 7], [7, 15], [7, 17], [7, 18], [7, 19], [7, 20],
-       [8, 2], [8, 5], [8, 6], [8, 7], [8, 15], [8, 16], [8, 17], [8, 20], 
+       [8, 2], [8, 5], [8, 6], [8, 7], [8, 15], [8, 16], [8, 17], [8, 20],
        [9, 2], [9, 3], [9, 4], [9, 5], [9, 7], [9, 15], [9, 17], [9, 18], [9, 19], [9, 20],
        [10, 2], [10, 3], [10, 5], [10, 7], [10, 15], [10, 17], [10, 19], [10, 20],
        [11, 2], [11, 3], [11, 4], [11, 5], [11, 7], [11, 17], [11, 18], [11, 19], [11, 20],
@@ -230,14 +257,14 @@ var elem = {
        [13, 2], [13, 3], [13, 4], [13, 5], [13, 7], [13, 15], [13, 17], [13, 18], [13, 19], [13, 20],
        [14, 2], [14, 5], [14, 6], [14, 7], [14, 15], [14, 16], [14, 17], [14, 20],
        [15, 2], [15, 3], [15, 4], [15, 5], [15, 7], [15, 15], [15, 17], [15, 18], [15, 19], [15, 20],
-       [16, 2], [16, 3], [16, 5], [16, 7], [16, 8], [16, 9], [16, 10], [16, 12], [16, 13], [16, 14], [16, 15], [16, 17], [16, 19], [16, 20], 
-       [17, 2], [17, 3], [17, 4], [17, 5], [17, 7], [17, 9], [17, 13], [17, 15], [17, 17], [17, 18], [17, 19], [17, 20], 
+       [16, 2], [16, 3], [16, 5], [16, 7], [16, 8], [16, 9], [16, 10], [16, 12], [16, 13], [16, 14], [16, 15], [16, 17], [16, 19], [16, 20],
+       [17, 2], [17, 3], [17, 4], [17, 5], [17, 7], [17, 9], [17, 13], [17, 15], [17, 17], [17, 18], [17, 19], [17, 20],
        [18, 2], [18, 5], [18, 6], [18, 7], [18, 9], [18, 13], [18, 15], [18, 16], [18, 17], [18, 20],
        [19, 2], [19, 3], [19, 4], [19, 5], [19, 7], [19, 9], [19, 10], [19, 12], [19, 13], [19, 15], [19, 17], [19, 18], [19, 19], [19, 20],
-       [20, 2], [20, 3], [20, 6], [20, 8], [20, 9], [20, 11], [20, 13], [20, 14], [20, 16], [20, 18], [20, 20], [20, 4], [20, 5], [20, 7], [20, 10], [20, 12], [20, 15], [20, 17], [20, 19], 
+       [20, 2], [20, 3], [20, 6], [20, 8], [20, 9], [20, 11], [20, 13], [20, 14], [20, 16], [20, 18], [20, 20], [20, 4], [20, 5], [20, 7], [20, 10], [20, 12], [20, 15], [20, 17], [20, 19],
     ],
     energyMap: [[11, 11]]
-  }, 
+  },
   ],
   defaults = {
     level: 0,
@@ -263,7 +290,37 @@ var elem = {
   ghostsMoveDelay = moveDelay*1,
   ghosts = [],
   energy = 0;
-  
+
+  var genHistory = [];
+  var topResultHistory = [];
+  var genChart;
+
+window.onload = function() {
+  var ctxChart = document.getElementById('genChart').getContext('2d');
+  genChart = new Chart(ctxChart, {
+    type: 'line',
+    data: {
+      labels: genHistory,
+      datasets: [{
+        label: 'Top Result (output)',
+        data: topResultHistory,
+        borderColor: 'rgba(255, 205, 86, 1)',
+        backgroundColor: 'rgba(255, 205, 86, 0.2)',
+        fill: true,
+        tension: 0.2,
+        pointRadius: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        x: { title: { display: true, text: 'Generation' } },
+        y: { title: { display: true, text: 'Top Result (output)' } }
+      }
+    }
+  });
+};
+
 /* Конец основных переменных */
 
 /* Блок обрабтки действий пользователя */
@@ -289,14 +346,14 @@ document.onkeydown = function(e) {//реакция на нажиние клав�
   if(e.keyCode == 32){//если пробел
     switch(state){
       case 'end':
-      case 'start': 
+      case 'start':
         reset();
         start();
         break;
-      case 'play': 
+      case 'play':
         pause();
         break;
-      case 'pause': 
+      case 'pause':
         continuation();
         break;
     }
@@ -321,7 +378,7 @@ document.onkeydown = function(e) {//реакция на нажиние клав�
 
   if(Date.now() - pacman.timeLastMove > moveDelay){//
       pacman.stack.push(dir);
-      console.log("> move "+turns[dir]);
+    /// console.log("> move "+turns[dir]);
       return;
   }
 
@@ -346,71 +403,104 @@ function start(){
   elem.desc.style.display = 'block';
   elem.currentPointsAmount.textContent = 0
   elem.pointsAmount.textContent = levels[level].pointsMap.length;//указание общего количества точек на уровне
-  
-  
+
+  elem.configData.textContent =  " layersConfig: "+layersConfig + " layersConfigMethod: "+layersConfigMethod;
+
   checkMap();
   createMap();
   drawMap();
   drawPacman();//Начальная отрисовка пакмана
-  
-	setSensors();
-	setweights();
+
+  initWeights();
+  setSensors();
 
   animateMove();
 }
 
 
 function restart(){
-	
-	if (score > maxScore){
-		//console.log("score="+score+" > maxScore = "+maxScore);
-		tempBestW=roundObject(w);
-		maxScore=score;
-		tempBestW.score=score;
-		console.log('Новый рекорд '+score+'points');
-		elem.output.textContent=score;
-		elem.persent.textContent=persent;
-	}
-	restartCount++;
-	console.log("restartCount "+restartCount);
-	if(restartCount>=unitsInGeneration)
-		{	avgPointsByGen=avgPointsByGen/unitsInGeneration;
-			restartCount=0;
-			units=[];
-			gen++; 
-			//elem.exportData.textContent=elem.exportData.textContent+' \n'+gen+' Рекорд '+maxScore+'points. avgPointsByGen:'+avgPointsByGen+':';
-			
-			if(avgPointsByGenPrew<avgPointsByGen){
-				BestW=tempBestW;
-				//elem.exportData.textContent=elem.exportData.textContent+'if'+avgPointsByGenPrew+'>'+avgPointsByGen+'){BestW = tempBestW ';
-				avgPointsByGenPrew=avgPointsByGen;
-			}
-			
-			var subavarage=100;
-			subavaragePointsByGen= subavaragePointsByGen+avgPointsByGen;
-			if(gen % subavarage == 0){
-				subavaragePointsByGen=subavaragePointsByGen/subavarage;
-				elem.exportData.textContent=elem.exportData.textContent+'\n === среднее за '+subavarage+' поколений ;'+subavaragePointsByGen+'; ';
-				subavaragePointsByGen=0;
-			}
-			avgPointsByGen=0;
-			//console.log(BestW);
-			//console.log('NEXT GEN');
-			
-		}
-		else
-		{
-			//elem.exportData.textContent=elem.exportData.textContent+' --'+score;
-			avgPointsByGen=avgPointsByGen+score;
-			reset();
-			start();
-		}
-			elem.gen.textContent=gen+' '+restartCount;
+
+  if (score > maxScore){
+    tempBestW=structuredClone(w);
+    //console.log("score="+score+" > maxScore = "+maxScore);
+    BestW = structuredClone(w);
+    elem.output.textContent=elem.output.textContent + "\n New BestW: "+ BestW+ "\n";
+
+    maxScore=score;
+    console.log('Новый рекорд '+score+'points');
+    elem.score.textContent=score;
+  }
+  restartCount++;
+  //console.log("restartCount "+restartCount);
+  if(restartCount>=unitsInGeneration) {
+    avgPointsByGen=avgPointsByGen/unitsInGeneration;
+    restartCount=0;
+    units=[];
+    //elem.exportData.textContent=elem.exportData.textContent+' \n'+gen+' Рекорд '+maxScore+'points. avgPointsByGen:'+avgPointsByGen+':';
+
+    if(avgPointsByGenPrew<=avgPointsByGen){
+      elem.output.textContent=elem.output.textContent+'\n :: Good :: '+avgPointsByGenPrew+' => '+avgPointsByGen+' prewgenWasBad '+prewgenWasBad;
+
+      BestW=tempBestW;
+      lastBestW = structuredClone(BestW);
+      elem.output.textContent=elem.output.textContent+ '\n=NEW lastBestW=='+ JSON.stringify(lastBestW)
+
+      prewgenWasBad = 0;
+      badMutatedWeights=[];
+
+    }
+    else {
+      elem.output.textContent=elem.output.textContent+'\n :: Bad :: '+avgPointsByGenPrew+' => '+avgPointsByGen+' prewgenWasBad '+prewgenWasBad;
+      if (prewgenWasBad){
+        BestW = lastBestW;
+      }else{
+        elem.output.textContent=elem.output.textContent+' ++reduсeLastMutation++ '
+
+        elem.output.textContent=elem.output.textContent+ '\n=lastBestW=='+ JSON.stringify(lastBestW)
+        BestW = reduсeLastMutation(lastBestW);
+        elem.output.textContent=elem.output.textContent+ '\n=BestW=='+ JSON.stringify(BestW)
+      }
+      prewgenWasBad = 1;
+    }
+    avgPointsByGenPrew=avgPointsByGen;
+    prewBestW=structuredClone(w);
+
+    var subavarageGenCount=10;
+    subavaragePointsByGen= subavaragePointsByGen+avgPointsByGen;
+    if(gen % subavarageGenCount == 0){
+      subavaragePointsByGen=subavaragePointsByGen/subavarageGenCount;
+      elem.output.textContent=elem.output.textContent+'\n === среднее за '+subavarageGenCount+' поколений :'+subavaragePointsByGen+' \n';
+      subavaragePointsByGen=0;
+    }
+
+
+    genHistory.push(gen);
+    topResultHistory.push(avgPointsByGen);
+    if (genChart) {
+      genChart.data.labels = genHistory;
+      genChart.data.datasets[0].data = topResultHistory;
+      genChart.update();
+    }
+    elem.output.textContent=elem.output.textContent+'\r\n GEN '+gen;
+    gen++;
+    console.log('gen: '+ gen)
+    avgPointsByGen=0;
+    //console.log(BestW);
+    //console.log('NEXT GEN');
+  }
+  else
+  {
+    elem.output.textContent=elem.output.textContent+' --'+score+'';
+    avgPointsByGen=avgPointsByGen+score;
+    reset();
+    start();
+  }
+  elem.gen.textContent=gen+' '+restartCount;
 }
 
 function pause(){
   state = 'pause';
-  elem.pause.style.display = 'block'; 
+  elem.pause.style.display = 'block';
 
   stopAnimateMove();
 }
@@ -461,7 +551,7 @@ function reset(){// Восстановление начальных показа
   ctx.clearRect(0, 0, elem.canvas.width, elem.canvas.height);
   elem.win.style.display = 'none';
   elem.lose.style.display = 'none';
-  level = defaults.level, points = 0, moveCount = 0, score = defaults.score, lives = defaults.lives, pacman.stack = []; 
+  level = defaults.level, points = 0, moveCount = 0, score = defaults.score, lives = defaults.lives, pacman.stack = [];
   for(var key in defaults.pacman){
     pacman[key] = defaults.pacman[key];
   }
@@ -495,12 +585,12 @@ function createMap(){
 
 function drawMap(){
   if(grafics == 1){
-	  ctx.fillStyle = '#000232'; // стены 
+	  ctx.fillStyle = '#000232'; // стены
 	  for(var i = 0; i < levels[level].obstaclesMap.length; i++){
 		ctx.fillRect((levels[level].obstaclesMap[i][0] - 1) * cellSize, (levels[level].obstaclesMap[i][1] - 1) * cellSize, cellSize, cellSize);
 	  }
 
-	  ctx.fillStyle = '#a7a6a7';// дверь 
+	  ctx.fillStyle = '#a7a6a7';// дверь
 	  for(var i = 0; i < levels[level].specialObstaclesMap.length; i++){
 		ctx.fillRect((levels[level].specialObstaclesMap[i][0] - 1) * cellSize, (levels[level].specialObstaclesMap[i][1] - 1) * cellSize, cellSize, cellSize);
 	  }
@@ -556,7 +646,7 @@ function drawPacman() {//Отрисовка пакмана
 		ctx.arc(center.x, center.y, cellSize / 2.25, Math.PI * pacman.dir / 2, Math.PI * pacman.dir / 2 + Math.PI * 2, false);
 	  } else {
 		ctx.arc(center.x, center.y, cellSize / 2.25, Math.PI * pacman.dir / 2 - Math.PI * 0.05 * pacman.angle, Math.PI * pacman.dir / 2 + Math.PI * 0.05 * pacman.angle, true);
-	  }  
+	  }
 	  ctx.lineTo(center.x, center.y);
 	  ctx.closePath();
 	  ctx.fill();
@@ -567,9 +657,9 @@ function movePacman(dir) {
 	//if(typeof(dir)=="undefined"){
 		dir=makeDesigion();
 	//}
-	console.log('function movePacman '+dir);
+  /// console.log('function movePacman '+dir);
   var x = pacman.x, y = pacman.y;
-  
+
   switch(dir){
     case 3: y--;
       break;
@@ -580,9 +670,10 @@ function movePacman(dir) {
     case 2: x--;
       break;
   }
-  
-  
-	
+
+  elem.move.textContent=moveCount++;
+
+
   if(x < 1 || y < 1 || x > cellAmount || y > cellAmount){
     if(dir != pacman.dir){
       //movePacman(pacman.dir);
@@ -593,9 +684,11 @@ function movePacman(dir) {
     if(x == levels[level].obstaclesMap[i][0] && y == levels[level].obstaclesMap[i][1]){
       if(dir != pacman.dir){
         //movePacman(pacman.dir);
-		}else{console.log('error moving  to obstaclesMap dir'+dir+' != pacman.dir'+pacman.dir);}
+      }else{
+        //console.log('error moving  to obstaclesMap dir'+dir+' != pacman.dir'+pacman.dir);
+      }
       return;
-	}//else{console.log('error moving  to obstaclesMap');}
+    }//else{console.log('error moving  to obstaclesMap');}
   }
   for(var i = 0; i < levels[level].specialObstaclesMap.length; i++){
     if(x == levels[level].specialObstaclesMap[i][0] && y == levels[level].specialObstaclesMap[i][1]){
@@ -605,20 +698,21 @@ function movePacman(dir) {
       return;
     }
   }
-  
+
   cleanObject(pacman);
   pacman.x = x, pacman.y = y, pacman.dir = dir;
   drawPacman();
   eatPoint();
+  setSensors();
 
-    
+
   //console.log("pacman х="+x+" y="+y);
-  
-  
-  	console.log(">>>> next move");
-  
+
+
+  	/// console.log(">>>> next move");
+
   elem.move.textContent=moveCount++;
- 
+
 }
 
 
@@ -628,7 +722,7 @@ function eatPoint(){
       score ++;
       elem.currentScore.textContent = score;
       map.pointsMap.splice(i, 1);
-      
+
       elem.currentPointsAmount.textContent = (levels[level].pointsMap.length - map.pointsMap.length);
       if(map.pointsMap.length == 0){
         win();
@@ -646,7 +740,7 @@ function animateMove(){
       movePacman();
     }
    checkIfstack();
-  console.log('animateMove'+moveDelay)
+    /// console.log('animateMove'+moveDelay)
   }, moveDelay);
 }
 
@@ -677,10 +771,10 @@ function stopAnimateMove(){
 ///////установка сенсоров
 //////////////////////////////////////////
 function setSensors(){ // установка сенсоров
-	
+
 	//sensors.energy = energy;
 	//sensors.energy = 0;
-	
+
 	sensorsCount=0;
 
     obstacles (pacman.x - 1, pacman.y, "oLeft");
@@ -701,13 +795,13 @@ function setSensors(){ // установка сенсоров
 			if(grafics == 1){
 				ctx.fillStyle = "red";
 				ctx.beginPath();
-				ctx.arc((x-0.5) * cellSize, (y-0.5) * cellSize, cellSize / 7, Math.PI * 2, false); 
+				ctx.arc((x-0.5) * cellSize, (y-0.5) * cellSize, cellSize / 7, Math.PI * 2, false);
 				ctx.fill();
 			}
         }
       }
     }
-    
+
     function points(x, y, dir){//проверка точки  на сенсоре
 	sensors[dir] = 0;
       for(var j = 0; j < map.pointsMap.length; j++){ // точка
@@ -716,59 +810,56 @@ function setSensors(){ // установка сенсоров
 			if(grafics == 1){
 				ctx.fillStyle = "red";
 				ctx.beginPath();
-				ctx.arc((x-0.5) * cellSize, (y-0.5) * cellSize, cellSize / 20, Math.PI * 2, false); 
-				ctx.fill();	
+				ctx.arc((x-0.5) * cellSize, (y-0.5) * cellSize, cellSize / 20, Math.PI * 2, false);
+				ctx.fill();
 			}
         }
       }
     }
-    
-    
-    input="";
-	for (key in sensors){
-		input +=  key +" = "+ sensors[key] +"; ";
-		sensorsCount++;
-	}
-	  if(grafics == 1){elem.input.textContent = input ; }
+
+
+  inputLog=" layersConfig: "+layersConfig + " layersConfigMethod: "+layersConfigMethod;
+  for (key in sensors){
+    inputLog +=  key +" = "+ sensors[key] +"; ";
+    sensorsCount++;
+  }
+  elem.inputShow.textContent = inputLog ;
+
+
 }
 //////////////////////////////////////////
 /////// установка весов для первого поколения случайные для остыльных - на осн лучших весов предидущего поколения
 //////////////////////////////////////////
 
 
-function setweights(){
-		if(Object.keys(BestW).length != 0){ // если не первое поколение
-			//w=BestW;
-			w=mutation(BestW);
-			//console.log(' new w is mutated BestW ');
-		}
-		else{
-			var wCount=sensorsCount*outputCount; // количество связей
-			//console.log('wCount= '+wCount);
-			for (var i = 0; i < wCount; i++) { 
-			var j = (-1 + Math.random() * 2).toFixed(2);// слусайное число от -1 до 1
-			w[i] = j; 
-			}  
-		}
-	//console.log("setweights");
-	console.log(w);
-	//console.log(BestW);
+function initWeights() {
+  if (Object.keys(BestW).length > 0) {
+
+    if (score > avgPointsByGen){
+      reduсeLastMutation(BestW)
+    }
+    w = mutation(structuredClone(BestW));
+    console.log('визначені ваги w');
+  } else {
+    w = [];
+    // console.log('layersConfig');
+    // console.log(layersConfig);
+
+    for (let l = 0; l < layersConfig.length-1; l++) {
+      let layerWeights = [];
+      const i = layersConfig[l];
+      const j = layersConfig[l + 1];
+      const weightCount = i * j;
+      for (let k = 0; k < weightCount; k++) {
+        const weight = randomWeight();
+        layerWeights.push(weight);
+      }
+      w.push(layerWeights);
+    }
+    console.log('Ініціалізовано випадкові ваги');
+  }
 }
 
-
-//////////////////////////////////////////
-///////округлить веса
-//////////////////////////////////////////
-function roundObject(obj){
-	//console.log("округлить ");
-	//console.log(obj);
-	//var newobj={};
-	//for (key in obj) {
-	//  newobj[key]=obj[key].toFixed(2);
-	//}
-	newobj=obj;
-	return newobj;
-}
 
 //////////////////////////////////////////
 ///////перезапуск если застрял пакмен
@@ -776,101 +867,188 @@ function roundObject(obj){
 
 
 function checkIfstack(){
-	
-	if(desigionCounter>1){ // если уперся 
-		stack++;
-		if(stack-moveCount>10){
-			restart()
-		}
-	}
+
+  // if(desigionCounter>1){ // если уперся
+  //   stack++;
+  //   if(stack-moveCount>10){
+  //     restart()
+  //   }
+  //
+  // }
 	if(moveCount>400){
 		restart()
 	}
-	
+
 	 //console.log ("desigionCounter="+desigionCounter+"; stack= "+stack );
-	 
+
 }
 //////////////////////////////////////////
-/////// мутация 
+/////// мутация
 //////////////////////////////////////////
+function reduсeLastMutation(arr) {
+  console.log('reduсeLastMutation=====');
 
-function mutation (BestW){
-	
-	
-	mutatedBestW =  jQuery.extend(true, {}, BestW);// скопировать
-	
-	mutatedBestW.mutation=persent+'%';
-	
-	var wCount=sensorsCount*outputCount; // количество связей
-	var mutatedCount = Math.ceil(wCount * persent / 100); // количество шт мутировавших весов 
-	for(i=0; i<mutatedCount; i++){
-		(Math.random() * wCount).toFixed()
-		var mutated=(Math.random() * wCount).toFixed()
-		mutatedBestW[mutated]=(-1 + Math.random() * 2).toFixed(4);// слусайное число от -1 до 1
-		//console.log("mutated weight id in  mutatedBestWBestW= "+ mutated);
-	}
-	
-	return mutatedBestW;
+  badMutatedWeights.forEach(({ path, newValue, oldValue }) => {
+    console.log(path);
+    const diff = oldValue - newValue;
+    const range = wMax - wMin;
+    const bias = diff * 10 / range;
+    const biasVal = oldValue * bias / 100;
+    const biasRes = oldValue + biasVal;
+    console.log(newValue +' back to '+ oldValue +' range '+ range +' diff '+ diff +' bias '+ bias +' biasVal '+ biasVal +' biasRes '+ biasRes);
+    setValueByPath(arr, path, biasRes);
+  });
+  badMutatedWeights=[];
+
+  return arr;
+}
+function mutation(arr) {
+  const allPaths = getAllIndexes(arr);
+  const total = allPaths.length;
+  const toReplaceCount = Math.floor(total * percent / 100);
+
+  const shuffled = allPaths.sort(() => 0.5 - Math.random());
+  const selected = shuffled.slice(0, toReplaceCount);
+
+  badMutatedWeights=[];
+  selected.forEach(path => {
+    const newValue = randomWeight();
+    const oldValue = getValueByPath(arr, path);
+    setValueByPath(arr, path, newValue);
+    badMutatedWeights.push({ path, newValue, oldValue });
+  });
+
+  return arr;
+}
+function getAllIndexes(arr, path = []) {
+  let indexes = [];
+
+  arr.forEach((item, i) => {
+    const currentPath = [...path, i];
+    if (Array.isArray(item)) {
+      indexes = indexes.concat(getAllIndexes(item, currentPath));
+    } else {
+      indexes.push(currentPath); // зберігаємо шлях до елемента
+    }
+  });
+
+  return indexes;
 }
 
+function setValueByPath(arr, path, value) {
+  let target = arr;
+  for (let i = 0; i < path.length - 1; i++) {
+    target = target[path[i]];
+  }
+  target[path[path.length - 1]] = value;
+}
+function getValueByPath(arr, path) {
+  let target = arr;
+  for (let i = 0; i < path.length; i++) {
+    target = target[path[i]];
+  }
+  return target;
+}
+function randomWeight() {
+  let r = Math.floor(Math.random() * (wMax - wMin + 1)) + wMin;
+  // console.log('randomWeight');
+  // console.log(r);
+  return r;
+}
 //////////////////////////////////////////
 /////// принятие решения
 //////////////////////////////////////////
 
 
 function makeDesigion(){
-	setSensors();
-	var inpFromSensors;
-	
-	i=0;
-	//layer0=layer(dim=8, input_dim=8)
-	output=layer(dim=4);
-	elem.exportData.textContent=turns[0]+" = "+output[0]+' \n'+turns[1]+" = "+output[1]+' \n'+turns[2]+" = "+output[2]+' \n'+turns[3]+" = "+output[3]+' \n';
-	
-	var maxSum=0;
-	for (d in output){ // перебор сумм входом для выходного слоя
-		if(output[d]>maxSum){
-			maxSum=output[d];
-			console.log (" maxSum="+output[d]+"dir=d("+d);
-			dir=Number(d);	
-		}
-	}
-	
-	pacman.stack.push(dir);
-	console.log ("> i think "+turns[dir]+dir);
-	//console.log (pacman.x+" "+pacman.y);
-	
-	
-	desigionCounter++;
-	return dir;
+  const oppositeDir = {
+    0: 2, // Right -> Left
+    1: 3, // Down -> Up
+    2: 0, // Left -> Right
+    3: 1  // Up -> Down
+  };
+
+  let nextDir
+  const currentDir = pacman.dir;
+  const forbiddenDir = oppositeDir[currentDir];
+
+  i=0;
+  output=spark();
+  output[forbiddenDir] = -Infinity;
+  elem.exportData.textContent=turns[0]+" = "+output[0]+' \n'+turns[1]+" = "+output[1]+' \n'+turns[2]+" = "+output[2]+' \n'+turns[3]+" = "+output[3]+' \n';
+
+
+
+  var maxSum=-Infinity;
+  output.forEach((value, index) => {
+    if (value > maxSum) {
+      maxSum = value;
+      nextDir = index;
+    }
+  });
+
+
+  pacman.stack.push(nextDir);
+
+
+  desigionCounter++;
+  return nextDir;
 }
 
 
- 
+function spark(){
+  let layerOutput=Object.values(sensors);
 
-
-
-function layer(dim, input_dim, input=sensors){
-	
-	var SuminpFromSensors=0;
-	var output=new Array(dim).fill(0);
-	for (x in input){ // преребор вхолов сенсоров (input_dim раз)
-			
-		for (var a=0; a<dim; a++){ // перебор нейронов  
-			
-			output[a]=Number(w[i])*input[x]+output[a];
-			console.log (" a="+a+" x="+x+" input[x]="+input[x]+" w"+i+":"+w[i]+" SuminpFromSensors="+SuminpFromSensors+" output[a]="+output[a]);
-			i++;  
-			
-		}
-		//console.log (" следующий входной слой");
-	}
-
-	return output;
+  for (let [l, weights] of w.entries()) { // перебор каждого слоя весов
+    layerOutput=layer(l, layerOutput);
+  }
+  return layerOutput;
 }
 
+
+
+function layer(layerKey, input){
+  let outputs = [];
+  let weights = w[layerKey];
+  let inputCount = layersConfig[layerKey];
+  let outputCount = layersConfig[layerKey + 1];
+  const method = layersConfigMethod[layerKey];
+
+  for (let j = 0; j < outputCount; j++) {
+    let weightedSum = 0;
+    for (let i = 0; i < inputCount; i++) {
+      let weightIndex = i * outputCount + j;
+      weightedSum += input[i] * weights[weightIndex];
+    }
+    let activationValue = activation(weightedSum, 0, method);
+    outputs.push(activationValue);
+  }
+
+  // console.log('layerKey');
+  // console.log(layerKey);
+  // console.log('outputs');
+  // console.log(outputs);
+  return outputs;
+}
+
+function activation(weightedSum, b = 0, method = 'ReLU'){
+  let activationValue = 0;
+  if(method === 'linear'){
+    activationValue = weightedSum;
+  } else if(method === 'step'){
+    activationValue = weightedSum > 0 ? wMax : 0;
+  } else if(method === 'ReLU'){
+    activationValue = weightedSum > 0 ? weightedSum : 0;
+  } else {
+    activationValue = weightedSum;
+  }
+
+  return activationValue + b;
+}
 </script>
 
-
+    <div style="width: 100%; max-width: 700px; margin: 30px auto;">
+      <canvas id="genChart" height="200"></canvas>
+    </div>
 </body>
-</html><!-- zzz </body><!-->
+</html>
